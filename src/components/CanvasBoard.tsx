@@ -73,7 +73,14 @@ export function CanvasBoard() {
   );
 
   return (
-    <div className="canvas-wrap" onPointerDown={() => setMenu(null)}>
+    <div
+      className="canvas-wrap"
+      onPointerDown={(e) => {
+        // close the context menu on click outside it (but let its items receive
+        // the full mousedown → click sequence)
+        if (!(e.target as Element).closest?.('.context-menu')) setMenu(null);
+      }}
+    >
       <ReactFlow
         key={board.id}
         nodes={board.nodes as unknown as Node[]}

@@ -26,11 +26,17 @@ export function EditableText({
   onFocusStart,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
+  // Last value we emitted to onChange. When the incoming `value` differs from
+  // this, the change came from outside (undo/redo, board switch) and must be
+  // written into the DOM even while focused.
+  const lastEmitted = useRef<string | null>(null);
 
   useEffect(() => {
     const el = ref.current;
-    if (el && document.activeElement !== el && el.innerText !== value) {
+    if (!el) return;
+    if (value !== lastEmitted.current) {
       el.innerText = value;
+      lastEmitted.current = value;
     }
   }, [value]);
 
@@ -42,7 +48,11 @@ export function EditableText({
       suppressContentEditableWarning
       spellCheck={false}
       data-placeholder={placeholder}
-      onInput={(e) => onChange((e.target as HTMLDivElement).innerText)}
+      onInput={(e) => {
+        const v = (e.target as HTMLDivElement).innerText;
+        lastEmitted.current = v;
+        onChange(v);
+      }}
       onKeyDown={(e) => {
         e.stopPropagation();
         if (e.key === 'Enter' && (!multiline || commitOnEnter)) {

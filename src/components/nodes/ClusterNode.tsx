@@ -20,6 +20,7 @@ export function ClusterNode({ id, data }: Props) {
   return (
     <div className="cluster-node">
       <Handle type="target" position={Position.Top} id="t" />
+      <Handle type="target" position={Position.Bottom} id="b" />
       <Handle type="source" position={Position.Bottom} id="s" />
       <EditableText
         className="cluster-label"

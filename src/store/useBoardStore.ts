@@ -522,6 +522,11 @@ useBoardStore.subscribe((s) => {
   savePersisted({ boards: s.boards, activeBoardId: s.activeBoardId });
 });
 
+if (import.meta.env.DEV) {
+  // dev-only debugging handle
+  (window as unknown as Record<string, unknown>).__BOS_STORE__ = useBoardStore;
+}
+
 // ---------- selectors / helpers ----------
 
 export function getActiveBoard(s: StoreState): Board {

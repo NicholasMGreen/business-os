@@ -256,12 +256,24 @@ export function seedBoards(): Board[] {
   }));
 
   const nodes: BoardNode[] = [...clusterNodes, root, ...columnNodes];
-  const edges: BoardEdge[] = columnNodes.map((c) => ({
-    id: uid('e'),
-    source: rootId,
-    target: c.id,
-    type: 'trunk',
-  }));
+  const edges: BoardEdge[] = [
+    // icon clusters hang on the trunk as well (attach at their bottom handle)
+    ...clusterNodes.map((c) => ({
+      id: uid('e'),
+      source: rootId,
+      target: c.id,
+      targetHandle: 'b',
+      type: 'trunk',
+    })),
+    // columns drop down from the trunk
+    ...columnNodes.map((c) => ({
+      id: uid('e'),
+      source: rootId,
+      target: c.id,
+      targetHandle: 't',
+      type: 'trunk',
+    })),
+  ];
 
   return [
     {
