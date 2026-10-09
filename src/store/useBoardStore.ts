@@ -170,9 +170,10 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       return { boards: withBoards(s, { ...board, viewport }) };
     }),
 
+  // NOTE: text edits do not push history per keystroke — EditableText calls
+  // pushHistory() once when an edit session starts (on focus).
   updateNodeData: (id, patch) =>
     set((s) => {
-      get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) =>
         n.id === id ? { ...n, data: { ...n.data, ...patch } as NodePayload } : n,
@@ -264,7 +265,6 @@ export const useBoardStore = create<StoreState>((set, get) => ({
 
   updateSection: (columnId, sectionId, patch) =>
     set((s) => {
-      get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
         if (n.id !== columnId || n.data.kind !== 'column') return n;

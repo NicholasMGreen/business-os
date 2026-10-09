@@ -8,6 +8,8 @@ interface Props {
   multiline?: boolean;
   /** Stop Enter from inserting a newline (single-line fields) */
   commitOnEnter?: boolean;
+  /** Called once when an edit session begins — used to push a single undo step. */
+  onFocusStart?: () => void;
 }
 
 /**
@@ -21,6 +23,7 @@ export function EditableText({
   placeholder = '…',
   multiline = false,
   commitOnEnter = true,
+  onFocusStart,
 }: Props) {
   const ref = useRef<HTMLDivElement>(null);
 
@@ -50,6 +53,7 @@ export function EditableText({
           (e.target as HTMLDivElement).blur();
         }
       }}
+      onFocus={() => onFocusStart?.()}
       onWheel={(e) => e.stopPropagation()}
       onPointerDown={(e) => e.stopPropagation()}
       onDoubleClick={(e) => e.stopPropagation()}
