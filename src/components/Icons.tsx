@@ -1,5 +1,6 @@
 import type { AppIconRef, IconLocation } from '../types';
 import { findApp } from '../data/appIcons';
+import { tileColors } from '../utils/colors';
 import { iconLabel, readIconDrag, writeIconDrag } from '../utils/dnd';
 import { useBoardStore } from '../store/useBoardStore';
 
@@ -14,11 +15,12 @@ export function IconTile({ icon, location, size = 26 }: TileProps) {
   const removeIcon = useBoardStore((s) => s.removeIcon);
   const app = icon.kind === 'builtin' ? findApp(icon.slug) : null;
   const label = iconLabel(icon);
+  const colors = app ? tileColors('#' + app.hex.replace('#', '')) : { bg: '#f4f4f4', fg: '#141414' };
 
   return (
     <div
       className="icon-tile nodrag"
-      style={{ width: size, height: size }}
+      style={{ width: size, height: size, background: colors.bg }}
       title={label}
       draggable
       onDragStart={(e) => {
@@ -35,7 +37,7 @@ export function IconTile({ icon, location, size = 26 }: TileProps) {
         <img src={icon.src} alt={icon.name} draggable={false} />
       ) : (
         <svg viewBox="0 0 24 24" width={size - 8} height={size - 8} aria-label={label}>
-          <path d={app?.path ?? ''} fill={app?.hex ?? '#fff'} />
+          <path d={app?.path ?? ''} fill={colors.fg} />
         </svg>
       )}
     </div>

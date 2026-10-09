@@ -1,3 +1,4 @@
+import { Handle, Position } from '@xyflow/react';
 import { EditableText } from '../EditableText';
 import { useBoardStore } from '../../store/useBoardStore';
 import type { NoteData } from '../../types';
@@ -14,6 +15,8 @@ export function NoteNode({ id, data }: Props) {
 
   return (
     <div className="note-node">
+      <Handle type="target" position={Position.Top} id="t" />
+      <Handle type="source" position={Position.Bottom} id="s" />
       <EditableText
         className="note-text"
         value={data.text}

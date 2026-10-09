@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
 import { EditableText } from '../EditableText';
 import { AppPicker } from '../AppPicker';
 import { IconGrid } from '../Icons';
@@ -21,6 +22,8 @@ export function ColumnNode({ id, data }: Props) {
 
   return (
     <div className={`column-node ${data.collapsed ? 'is-collapsed' : ''}`}>
+      <Handle type="target" position={Position.Top} id="t" />
+      <Handle type="source" position={Position.Bottom} id="s" />
       <div className="column-header">
         <button
           type="button"

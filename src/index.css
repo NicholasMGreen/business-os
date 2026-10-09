@@ -727,6 +727,17 @@ body,
   text-overflow: ellipsis;
 }
 
+.picker-tile {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 1px solid var(--line-soft);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
 .picker-item:hover {
   border-color: var(--line);
   background: rgba(255, 255, 255, 0.05);

@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Handle, Position } from '@xyflow/react';
 import { EditableText } from '../EditableText';
 import { AppPicker } from '../AppPicker';
 import { IconGrid } from '../Icons';
@@ -18,6 +19,8 @@ export function ClusterNode({ id, data }: Props) {
 
   return (
     <div className="cluster-node">
+      <Handle type="target" position={Position.Top} id="t" />
+      <Handle type="source" position={Position.Bottom} id="s" />
       <EditableText
         className="cluster-label"
         value={data.label}

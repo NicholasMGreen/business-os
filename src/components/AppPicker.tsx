@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react';
 import { APP_CATEGORIES, APP_LIBRARY } from '../data/appIcons';
+import { tileColors } from '../utils/colors';
 import type { AppIconRef, IconLocation } from '../types';
 import { useBoardStore } from '../store/useBoardStore';
 
@@ -70,20 +71,25 @@ export function AppPicker({ target, onClose }: Props) {
         </div>
 
         <div className="picker-grid">
-          {results.map((a) => (
-            <button
-              key={a.slug}
-              type="button"
-              className="picker-item"
-              title={a.name}
-              onClick={() => commit({ kind: 'builtin', slug: a.slug })}
-            >
-              <svg viewBox="0 0 24 24" width="22" height="22">
-                <path d={a.path} fill={'#' + a.hex.replace('#', '')} />
-              </svg>
-              <span>{a.name}</span>
-            </button>
-          ))}
+          {results.map((a) => {
+            const colors = tileColors('#' + a.hex.replace('#', ''));
+            return (
+              <button
+                key={a.slug}
+                type="button"
+                className="picker-item"
+                title={a.name}
+                onClick={() => commit({ kind: 'builtin', slug: a.slug })}
+              >
+                <span className="picker-tile" style={{ background: colors.bg }}>
+                  <svg viewBox="0 0 24 24" width="14" height="14">
+                    <path d={a.path} fill={colors.fg} />
+                  </svg>
+                </span>
+                <span>{a.name}</span>
+              </button>
+            );
+          })}
           {results.length === 0 && <div className="picker-empty">No apps match “{query}”</div>}
         </div>
 

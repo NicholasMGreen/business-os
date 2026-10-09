@@ -1,6 +1,6 @@
 import type { Board } from '../types';
 
-const KEY = 'business-os:v1';
+const KEY = 'business-os:v2';
 
 export interface PersistedState {
   boards: Board[];

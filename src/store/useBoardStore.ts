@@ -86,9 +86,11 @@ function iconList(data: NodePayload, scope: IconLocation['scope']): AppIconRef[]
 
 const HISTORY_LIMIT = 60;
 
+const seeded = seedBoards();
+
 export const useBoardStore = create<StoreState>((set, get) => ({
-  boards: seedBoards(),
-  activeBoardId: seedBoards()[0].id,
+  boards: seeded,
+  activeBoardId: seeded[0].id,
   past: [],
   future: [],
 

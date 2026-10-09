@@ -73,14 +73,14 @@ export function seedBoards(): Board[] {
   const clusterNodes: BoardNode[] = clusterDefs.map((c) => ({
     id: uid('cluster'),
     type: 'cluster',
-    position: { x: c.x, y: 0 },
+    position: { x: c.x, y: 40 },
     data: { kind: 'cluster', label: c.label, icons: c.icons.map(b) },
   }));
 
   const root: BoardNode = {
     id: rootId,
     type: 'root',
-    position: { x: -230, y: 20 },
+    position: { x: -230, y: 0 },
     data: {
       kind: 'root',
       name: 'Marketing Framework',
@@ -250,7 +250,7 @@ export function seedBoards(): Board[] {
   const columnNodes: BoardNode[] = columnDefs.map((c) => ({
     id: uid('col'),
     type: 'column',
-    position: { x: c.x, y: 620 },
+    position: { x: c.x, y: 520 },
     data: c.data,
     width: 620,
   }));

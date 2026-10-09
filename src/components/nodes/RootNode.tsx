@@ -1,3 +1,4 @@
+import { Handle, Position } from '@xyflow/react';
 import { EditableText } from '../EditableText';
 import { useBoardStore } from '../../store/useBoardStore';
 import type { RootData } from '../../types';
@@ -14,6 +15,8 @@ export function RootNode({ id, data }: Props) {
 
   return (
     <div className="root-node">
+      <Handle type="target" position={Position.Top} id="t" />
+      <Handle type="source" position={Position.Bottom} id="s" />
       <div className="root-logo" aria-hidden>
         ✳
       </div>
