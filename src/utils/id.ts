@@ -1,0 +1,12 @@
+let counter = 0;
+
+export function uid(prefix = 'n'): string {
+  counter = (counter + 1) % 10000;
+  return `${prefix}_${Date.now().toString(36)}_${counter.toString(36)}${Math.random()
+    .toString(36)
+    .slice(2, 6)}`;
+}
+
+export function clone<T>(value: T): T {
+  return JSON.parse(JSON.stringify(value)) as T;
+}
