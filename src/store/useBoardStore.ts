@@ -12,6 +12,7 @@ import type {
   Viewport,
 } from '../types';
 import { clone, uid } from '../utils/id';
+import { nearestNode } from '../utils/geometry';
 import { seedBoards } from '../data/seedBoard';
 import { loadPersisted, savePersisted } from './persist';
 
@@ -35,7 +36,8 @@ interface StoreState {
   // nodes
   updateNodeData: (id: string, patch: Partial<NodePayload>) => void;
   addNote: (position: { x: number; y: number }, text?: string) => string;
-  addChildNote: (parentId: string) => void;
+  addCard: (position: { x: number; y: number }) => string;
+  addChildNote: (parentId: string, kind?: 'note' | 'card') => void;
   duplicateNode: (id: string) => void;
   deleteNode: (id: string) => void;
 
@@ -82,6 +84,11 @@ function iconList(data: NodePayload, scope: IconLocation['scope']): AppIconRef[]
   if (scope === 'cluster' && data.kind === 'cluster') return data.icons;
   if (scope === 'tools' && data.kind === 'column') return data.tools;
   return null;
+}
+
+/** Nodes whose payload carries collapsible sections (columns + big-note cards). */
+function isSectioned(data: NodePayload): boolean {
+  return data.kind === 'column' || data.kind === 'card';
 }
 
 const HISTORY_LIMIT = 60;
@@ -162,7 +169,14 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       if (board.edges.some((e) => e.source === source && e.target === target)) return s;
-      const edge: BoardEdge = { id: uid('e'), source, target, type: 'default' };
+      const edge: BoardEdge = {
+        id: uid('e'),
+        source,
+        target,
+        sourceHandle: 's',
+        targetHandle: 't',
+        type: 'trunk',
+      };
       return { boards: withBoards(s, { ...board, edges: [...board.edges, edge] }) };
     }),
 
@@ -189,28 +203,88 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const node: BoardNode = { id, type: 'note', position, data: { kind: 'note', text } };
-      return { boards: withBoards(s, { ...board, nodes: [...board.nodes, node] }) };
+      // auto-connect into the tree: link to the nearest existing node
+      const parent = nearestNode(board.nodes, position, 'note');
+      const edges = parent
+        ? [
+            ...board.edges,
+            { id: uid('e'), source: parent.id, target: id, sourceHandle: 's', targetHandle: 't', type: 'trunk' },
+          ]
+        : board.edges;
+      return { boards: withBoards(s, { ...board, nodes: [...board.nodes, node], edges }) };
     });
     return id;
   },
 
-  addChildNote: (parentId) =>
+  addCard: (position) => {
+    const id = uid('card');
+    set((s) => {
+      get().pushHistory();
+      const board = activeBoard(s);
+      const node: BoardNode = {
+        id,
+        type: 'card',
+        position,
+        data: {
+          kind: 'card',
+          title: 'Big Note',
+          objective: 'What is this about?',
+          sections: [
+            {
+              id: uid('sec'),
+              title: 'Section 1',
+              columns: [['Bullet point'], ['Bullet point']],
+            },
+          ],
+        },
+      };
+      const parent = nearestNode(board.nodes, position, 'card');
+      const edges = parent
+        ? [
+            ...board.edges,
+            { id: uid('e'), source: parent.id, target: id, sourceHandle: 's', targetHandle: 't', type: 'trunk' },
+          ]
+        : board.edges;
+      return { boards: withBoards(s, { ...board, nodes: [...board.nodes, node], edges }) };
+    });
+    return id;
+  },
+
+  addChildNote: (parentId, kind = 'note') =>
     set((s) => {
       get().pushHistory();
       const board = activeBoard(s);
       const parent = board.nodes.find((n) => n.id === parentId);
       if (!parent) return s;
+      const id = uid(kind);
+      const data: NodePayload =
+        kind === 'card'
+          ? {
+              kind: 'card',
+              title: 'Big Note',
+              objective: 'What is this about?',
+              sections: [
+                {
+                  id: uid('sec'),
+                  title: 'Section 1',
+                  columns: [['Bullet point'], ['Bullet point']],
+                },
+              ],
+            }
+          : { kind: 'note', text: 'New note' };
       const node: BoardNode = {
-        id: uid('note'),
-        type: 'note',
+        id,
+        type: kind,
         position: { x: parent.position.x + 40, y: parent.position.y + 260 },
-        data: { kind: 'note', text: 'New note' },
+        data,
       };
       const edge: BoardEdge = {
         id: uid('e'),
         source: parentId,
         target: node.id,
-        type: 'default',
+        sourceHandle: 's',
+        targetHandle: 't',
+        type: 'trunk',
       };
       return {
         boards: withBoards(s, {
@@ -253,7 +327,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         const section: Section = {
           id: uid('sec'),
@@ -269,7 +343,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
     set((s) => {
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return {
           ...n,
@@ -287,7 +361,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return { ...n, data: { ...data, sections: data.sections.filter((sec) => sec.id !== sectionId) } };
       });
@@ -299,7 +373,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return {
           ...n,
@@ -319,7 +393,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return {
           ...n,
@@ -340,7 +414,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
     set((s) => {
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return {
           ...n,
@@ -364,7 +438,7 @@ export const useBoardStore = create<StoreState>((set, get) => ({
       get().pushHistory();
       const board = activeBoard(s);
       const nodes = board.nodes.map((n) => {
-        if (n.id !== columnId || n.data.kind !== 'column') return n;
+        if (n.id !== columnId || !isSectioned(n.data)) return n;
         const data = n.data as ColumnData;
         return {
           ...n,

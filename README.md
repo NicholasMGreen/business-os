@@ -19,8 +19,13 @@ app-icon clusters hanging on a trunk line, and dense framework columns below.
   Stripe, HubSpot…) rendered in brand colors, plus custom image URLs.
   Icons are draggable between clusters and into any column's Tools box,
   with a searchable "Add app" picker on every cluster/box.
-- **Inline editing everywhere** — double-click text to edit in place; add/remove
-  notes, table columns and sections; right-click for add-child / duplicate / delete.
+- **Two note sizes** — small free notes and **big notes**: cards with
+  collapsible dropdown sections of bullet tables (same anatomy as a framework
+  column). Every new note auto-connects to its nearest neighbor with a
+  connector line, so the tree never fragments.
+- **Inline editing** — double-click any text to edit in place (click/drag just
+  moves the node); add/remove notes, table columns and sections;
+  right-click for add-child / duplicate / delete.
 - **Undo / redo** — `Ctrl/Cmd+Z`, `Ctrl/Cmd+Shift+Z` (one step per edit session).
 - **Multiple boards** — tabs across the top (e.g. Marketing, Product, Finance).
 - **Persistence** — autosaved to `localStorage`; export/import the whole
@@ -47,11 +52,12 @@ npm run build    # type-check + production build to dist/
 | Pan | drag empty canvas (mouse / one finger) |
 | Zoom | scroll wheel / pinch (cursor-centered) |
 | Add note | double-click empty canvas, or `+ note` in the top bar |
-| Edit text | double-click / just type when focused |
+| Add big note | `+ big note` in the top bar, or right-click → *Add big note here* |
+| Edit text | double-click the text (blur or `Esc` to finish) |
 | Add app icon | `+` tile in any cluster or Tools box |
 | Move app icon | drag an icon tile onto another cluster or a Tools box |
 | Delete icon | right-click an icon tile |
-| Node menu | right-click a node (add child note, duplicate, delete) |
+| Node menu | right-click a node (add child note, add big note, duplicate, delete) |
 | Undo / redo | `Ctrl/Cmd+Z` / `Ctrl/Cmd+Shift+Z` |
 | Delete node | select node, `Backspace` / `Delete` |
 
@@ -73,7 +79,8 @@ src/
     AppPicker.tsx           searchable app picker + custom URL
     EditableText.tsx        inline contentEditable editor
     TrunkEdge.tsx           elbow connector (trunk + branches)
-    nodes/                  RootNode, ClusterNode, ColumnNode, NoteNode
+    nodes/                  RootNode, ClusterNode, ColumnNode, CardNode, NoteNode
+  utils/geometry.ts         nearest-node search for auto-connecting new notes
 scripts/gen-icons.cjs       regenerates src/data/appIcons.ts from simple-icons
 ```
 

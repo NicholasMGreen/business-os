@@ -261,6 +261,7 @@ export function seedBoards(): Board[] {
     ...clusterNodes.map((c) => ({
       id: uid('e'),
       source: rootId,
+      sourceHandle: 's',
       target: c.id,
       targetHandle: 'b',
       type: 'trunk',
@@ -269,6 +270,7 @@ export function seedBoards(): Board[] {
     ...columnNodes.map((c) => ({
       id: uid('e'),
       source: rootId,
+      sourceHandle: 's',
       target: c.id,
       targetHandle: 't',
       type: 'trunk',

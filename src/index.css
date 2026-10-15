@@ -162,14 +162,23 @@ body,
 
 .canvas-wrap .react-flow__handle {
   opacity: 0;
-  width: 6px;
-  height: 6px;
+  width: 9px;
+  height: 9px;
   min-width: 0;
   min-height: 0;
+  background: var(--ink);
+  border: 2px solid #000;
+  transition: opacity 0.15s;
+}
+
+/* link handles appear when hovering a node so notes can be wired by hand */
+.canvas-wrap .react-flow__node:hover .react-flow__handle {
+  opacity: 0.75;
 }
 
 .canvas-wrap .react-flow__node.selected .root-node,
 .canvas-wrap .react-flow__node.selected .column-node,
+.canvas-wrap .react-flow__node.selected .card-node,
 .canvas-wrap .react-flow__node.selected .cluster-node,
 .canvas-wrap .react-flow__node.selected .note-node {
   outline: 1px dashed var(--ink-soft);
@@ -208,7 +217,8 @@ body,
   outline: none;
   white-space: pre-wrap;
   word-break: break-word;
-  cursor: text;
+  cursor: default;
+  user-select: none;
   min-width: 12px;
 }
 
@@ -217,9 +227,13 @@ body,
   opacity: 0.35;
 }
 
-.editable:focus {
-  background: rgba(255, 255, 255, 0.07);
+/* edit mode: double-click to edit, blur to leave */
+.editable.is-editing {
+  cursor: text;
+  user-select: text;
+  background: rgba(255, 255, 255, 0.08);
   border-radius: 3px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.25);
 }
 
 /* ---------- root node ---------- */
@@ -569,6 +583,42 @@ body,
   align-self: stretch;
   text-align: center;
   padding: 5px 8px;
+}
+
+/* ---------- big note card node ---------- */
+
+.card-node {
+  width: 560px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 12px 12px 14px;
+  background: #000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 5px 10px;
+}
+
+.card-title {
+  flex: 1 1 auto;
+  font-family: var(--font-hand);
+  font-size: 15px;
+  letter-spacing: 1px;
+  min-width: 80px;
+}
+
+.card-objective {
+  border: 1px solid var(--line-soft);
+  border-radius: 8px;
+  padding: 7px 8px;
 }
 
 /* ---------- note node ---------- */

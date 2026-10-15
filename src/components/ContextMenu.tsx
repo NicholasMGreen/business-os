@@ -8,9 +8,12 @@ export interface MenuState {
   flowPosition?: { x: number; y: number };
 }
 
-/** Minimal right-click menu: node actions, or "add note" on empty canvas. */
+/**
+ * Minimal right-click menu: node actions (add child note / big note, duplicate,
+ * delete) or canvas actions (add note / big note, auto-connected to the tree).
+ */
 export function ContextMenu({ state, onClose }: { state: MenuState; onClose: () => void }) {
-  const { addChildNote, duplicateNode, deleteNode, addNote } = useBoardStore();
+  const { addChildNote, duplicateNode, deleteNode, addNote, addCard } = useBoardStore();
   const [confirmDelete, setConfirmDelete] = useState(false);
 
   const run = (fn: () => void) => {
@@ -22,8 +25,11 @@ export function ContextMenu({ state, onClose }: { state: MenuState; onClose: () 
     <div className="context-menu" style={{ left: state.x, top: state.y }} onMouseLeave={onClose}>
       {state.nodeId ? (
         <>
-          <button type="button" onClick={() => run(() => addChildNote(state.nodeId!))}>
+          <button type="button" onClick={() => run(() => addChildNote(state.nodeId!, 'note'))}>
             Add child note
+          </button>
+          <button type="button" onClick={() => run(() => addChildNote(state.nodeId!, 'card'))}>
+            Add big note
           </button>
           <button type="button" onClick={() => run(() => duplicateNode(state.nodeId!))}>
             Duplicate
@@ -40,16 +46,20 @@ export function ContextMenu({ state, onClose }: { state: MenuState; onClose: () 
           </button>
         </>
       ) : (
-        <button
-          type="button"
-          onClick={() =>
-            run(() =>
-              addNote(state.flowPosition ?? { x: 0, y: 0 }),
-            )
-          }
-        >
-          Add note here
-        </button>
+        <>
+          <button
+            type="button"
+            onClick={() => run(() => addNote(state.flowPosition ?? { x: 0, y: 0 }))}
+          >
+            Add note here
+          </button>
+          <button
+            type="button"
+            onClick={() => run(() => addCard(state.flowPosition ?? { x: 0, y: 0 }))}
+          >
+            Add big note here
+          </button>
+        </>
       )}
     </div>
   );

@@ -48,7 +48,16 @@ export interface NoteData {
   text: string;
 }
 
-export type NodePayload = RootData | ClusterData | ColumnData | NoteData;
+/** A "big note": a card with collapsible dropdown sections of bullet tables. */
+export interface CardData {
+  kind: 'card';
+  title: string;
+  objective: string;
+  sections: Section[];
+  collapsed?: boolean;
+}
+
+export type NodePayload = RootData | ClusterData | ColumnData | NoteData | CardData;
 
 export type NodeKind = NodePayload['kind'];
 

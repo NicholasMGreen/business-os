@@ -14,6 +14,7 @@ export function TopBar() {
     undo,
     redo,
     addNote,
+    addCard,
     exportJSON,
     importJSON,
   } = useBoardStore();
@@ -25,6 +26,13 @@ export function TopBar() {
     const x = (window.innerWidth / 2 - vp.x) / vp.zoom - 110;
     const y = (window.innerHeight / 2 - vp.y) / vp.zoom - 40;
     addNote({ x, y });
+  };
+
+  const addCardAtCenter = () => {
+    const vp = board.viewport;
+    const x = (window.innerWidth / 2 - vp.x) / vp.zoom - 280;
+    const y = (window.innerHeight / 2 - vp.y) / vp.zoom - 210;
+    addCard({ x, y });
   };
 
   const onExport = () => {
@@ -88,6 +96,9 @@ export function TopBar() {
         </button>
         <button type="button" className="ghost-btn" onClick={addNoteAtCenter}>
           + note
+        </button>
+        <button type="button" className="ghost-btn" onClick={addCardAtCenter}>
+          + big note
         </button>
         <button type="button" className="ghost-btn" onClick={onExport}>
           export

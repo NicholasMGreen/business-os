@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import {
   ReactFlow,
   applyEdgeChanges,
@@ -18,6 +18,7 @@ import { RootNode } from './nodes/RootNode';
 import { ClusterNode } from './nodes/ClusterNode';
 import { ColumnNode } from './nodes/ColumnNode';
 import { NoteNode } from './nodes/NoteNode';
+import { CardNode } from './nodes/CardNode';
 import { TrunkEdge } from './TrunkEdge';
 import { ContextMenu, type MenuState } from './ContextMenu';
 
@@ -26,6 +27,7 @@ const nodeTypes: NodeTypes = {
   cluster: ClusterNode as unknown as NodeTypes[string],
   column: ColumnNode as unknown as NodeTypes[string],
   note: NoteNode as unknown as NodeTypes[string],
+  card: CardNode as unknown as NodeTypes[string],
 };
 
 const edgeTypes: EdgeTypes = {
@@ -48,6 +50,24 @@ export function CanvasBoard() {
   const { screenToFlowPosition } = useReactFlow();
   const [menu, setMenu] = useState<MenuState | null>(null);
   const menuRef = useRef<HTMLDivElement>(null);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Double-click on empty canvas → add a connected note.
+  // A native capture listener is required: React Flow's d3-zoom stops the
+  // dblclick on the pane (its zoom-on-double-click handler), so the event
+  // never bubbles up to React.
+  useEffect(() => {
+    const el = wrapRef.current;
+    if (!el) return;
+    const handler = (e: MouseEvent) => {
+      const target = e.target as Element;
+      if (!target.classList?.contains('react-flow__pane')) return;
+      const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
+      addNote({ x: pos.x - 110, y: pos.y - 40 });
+    };
+    el.addEventListener('dblclick', handler, true);
+    return () => el.removeEventListener('dblclick', handler, true);
+  }, [screenToFlowPosition, addNote]);
 
   const onNodesChange = useCallback(
     (changes: NodeChange[]) => {
@@ -75,6 +95,7 @@ export function CanvasBoard() {
   return (
     <div
       className="canvas-wrap"
+      ref={wrapRef}
       onPointerDown={(e) => {
         // close the context menu on click outside it (but let its items receive
         // the full mousedown → click sequence)
@@ -92,11 +113,6 @@ export function CanvasBoard() {
         onConnect={onConnect}
         onNodeDragStart={() => pushHistory()}
         onMoveEnd={(_, viewport) => setViewport(viewport)}
-        onDoubleClick={(e) => {
-          if (!(e.target as Element).classList?.contains('react-flow__pane')) return;
-          const pos = screenToFlowPosition({ x: e.clientX, y: e.clientY });
-          addNote({ x: pos.x - 110, y: pos.y - 40 });
-        }}
         onNodeContextMenu={(e, node) => {
           e.preventDefault();
           setMenu({ x: e.clientX, y: e.clientY, nodeId: node.id });
@@ -114,6 +130,7 @@ export function CanvasBoard() {
         maxZoom={4}
         zoomOnScroll
         zoomOnPinch
+        zoomOnDoubleClick={false}
         panOnDrag
         panOnScroll={false}
         selectionKeyCode="Shift"
